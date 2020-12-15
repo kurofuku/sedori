@@ -35,8 +35,7 @@ class YodobashiCamera(Shop.Shop):
 			print(self.url + category["url"])
 			return itemList
 		# Get item table in each page.
-		# for loop in range((int(items) // displayCount) + 1):
-		for loop in range(2):
+		for loop in range((int(items) // displayCount) + 1):
 			print('loop == ' + str(loop))
 			try:
 				response = requests.get(self.url + category["url"] + "p" + str(loop + 1) + "/?word=", timeout = self.timeout, headers = headers)
@@ -93,7 +92,7 @@ class YodobashiCamera(Shop.Shop):
 					dict["product"] = product.text
 					point = re.search('([0-9]{1,3}(,[0-9]{1,3})?)ポイント', points[i].text).group(1)
 					dict["point"] = point.replace(",", "")
-					dict["url"] = pathes[i]
+					dict["url"] = self.url + pathes[i]
 					itemList.append(dict)
 		return itemList
 

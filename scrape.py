@@ -91,6 +91,7 @@ def main():
 	import YamadaWebCom
 	import BicCamera
 	import Rakuten
+	import YodobashiCamera
 
 	syslog.openlog(logoption = syslog.LOG_PID)
 	syslog.syslog("Process start.")
@@ -101,9 +102,10 @@ def main():
 
 	itemList = []
 	shopList = []
-	shopList.append(YamadaWebCom.YamadaWebCom())
+	# shopList.append(YamadaWebCom.YamadaWebCom())
 	# shopList.append(BicCamera.BicCamera())
-	shopList.append(Rakuten.Rakuten())
+	# shopList.append(Rakuten.Rakuten())
+	shopList.append(YodobashiCamera.YodobashiCamera())
 
 	for shop in shopList:
 		shop.UpdateItemList()
