@@ -14,13 +14,19 @@ class BicCamera(Shop.Shop):
 		self.name = "BicCamera"
 		self.url = "https://www.biccamera.com/"
 		self.itemList = []
+		self.minPercentage = 15
 
 	def ObtainItemListByCategory(self, category):
 		itemList = []
 
 		displayCount = 100
 
-		response = requests.get(self.url + category["url"], timeout = self.timeout)
+		headers = {
+			'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Accept-Language': 'ja',
+		}
+		response = requests.get(self.url + category["url"], timeout = self.timeout, headers = headers)
 		if requests.codes.ok != response.status_code:
 			print("status code is " + str(response.status_code) + " from " + self.url + category["url"])
 			return itemList
@@ -33,38 +39,35 @@ class BicCamera(Shop.Shop):
 		# Get item table in each page.
 		for loop in range((int(items) // displayCount) + 1):
 			try:
-				response = requests.get(self.url + category["url"] + "/?rowPerPage=" + str(displayCount) + "&p=" + str(loop + 1), timeout = self.timeout)
+				esponse = requests.get(self.url + category["url"] + "/?rowPerPage=" + str(displayCount) + "&p=" + str(loop + 1), timeout = self.timeout, headers = headers)
 			except:
 				continue
 			if requests.codes.ok != response.status_code:
 				continue
 			doc = html.fromstring(response.text)
 			# Path for getting model name.
-			# pathes = doc.xpath("//p[@class='bcs_point'][contains(./text(), '10')]/preceding-sibling::p[@class='bcs_title']/a/@href")
-			pathes = doc.xpath("//p[@class='bcs_point'][contains(./text(), '％')]/preceding-sibling::p[@class='bcs_title']/a/@href")
+			pathes = doc.xpath("//p[@class='bcs_point']/preceding-sibling::p[@class='bcs_title']/a/@href")
 			# Price.
-			# prices = doc.xpath("//p[@class='bcs_point'][contains(./text(), '10')]/preceding-sibling::p[@class='bcs_tax']")
-			prices = doc.xpath("//p[@class='bcs_point'][contains(./text(), '％')]/preceding-sibling::p[@class='bcs_tax']")
+			prices = doc.xpath("//p[@class='bcs_point']/preceding-sibling::p[@class='bcs_price']/span[@class='val']")
 			# Points.
-			# points = doc.xpath("//p[@class='bcs_point'][contains(./text(), '10')]/span")
-			points = doc.xpath("//p[@class='bcs_point'][contains(./text(), '％')]/span")
+			points = doc.xpath("//p[@class='bcs_point']/span")
 			for i in range(len(pathes)):
-				try:
-					# First, I check if this item is added over 10% points.
-					percentage = re.search('([0-9]*)％', points[i].text).group(1)
-					if (10 > int(percentage)):
+				if re.search('[0-9]+(,[0-9]{1,3})*', prices[i].text) is not None:
+					price = re.search('[0-9]+(,[0-9]{1,3})*', prices[i].text).group(0).replace(",", "")
+					point = re.search('[0-9]+(,[0-9]{1,3})*', points[i].text).group(0).replace(",", "").replace("ポイント", "")
+					try:
+						# First, I check if this item is added over 10% points.
+						if (self.minPercentage > (int(price) / int(point))):
+							continue
+					except:
 						continue
-				except:
-					continue
-				if re.search('[1-9]+(,[0-9]{1,3})*', prices[i].text) is not None:
 					dict = {}
-					price = re.search('[1-9]+(,[0-9]{1,3})*', prices[i].text).group(0)
-					dict["price"] = price.replace(",", "")
+					dict["price"] = price
 					# I check price is affordable.
-					if self.minPrice > int(dict["price"]) or self.maxPrice < int(dict["price"]):
+					if self.minPrice > int(price) or self.maxPrice < int(price):
 						continue
 					try:
-						detailDoc = requests.get(pathes[i], timeout = self.timeout)
+						detailDoc = requests.get(pathes[i], timeout = self.timeout, headers = headers)
 					except:
 						print("Oops!")
 						print(pathes[i])
@@ -77,13 +80,23 @@ class BicCamera(Shop.Shop):
 					# Category
 					dict["category"] = category["name"]
 					# Model Name
-					model = html.fromstring(detailDoc.text).xpath("//div[@class='bcs_detail']/table[1]/tbody[1]/tr[2]/td[1]")[0]
+					model = None
+					try:
+						model = html.fromstring(detailDoc.text).xpath("//div[@class='bcs_detail']/table[1]/tbody[1]/tr[2]/td[1]")[0]
+					except:
+						pass
+					if model is None:
+						try:
+							model = html.fromstring(detailDoc.text).xpath("//div[@class='bcs_detail']/table[1]/tbody/tr[2]/td")[0]
+						except:
+							pass
+					if model is None:
+						continue
 					dict["name"] = model.text
 					# Product Name
 					product = html.fromstring(detailDoc.text).xpath("//section/@data-item-name")[0]
 					dict["product"] = product
-					point = re.search('[1-9]+(,[0-9]{1,3})ポイント', points[i].text).group(0)
-					dict["point"] = point.replace(",", "")
+					dict["point"] = point
 					dict["url"] = pathes[i]
 					itemList.append(dict)
 		return itemList
