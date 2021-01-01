@@ -102,9 +102,9 @@ def main():
 
 	itemList = []
 	shopList = []
-	# shopList.append(YamadaWebCom.YamadaWebCom())
-	# shopList.append(BicCamera.BicCamera())
-	# shopList.append(Rakuten.Rakuten())
+	shopList.append(YamadaWebCom.YamadaWebCom())
+	shopList.append(BicCamera.BicCamera())
+	shopList.append(Rakuten.Rakuten())
 	shopList.append(YodobashiCamera.YodobashiCamera())
 
 	for shop in shopList:
