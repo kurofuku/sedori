@@ -35,7 +35,7 @@ class YodobashiCamera(Shop.Shop):
 			print(self.url + category["url"])
 			return itemList
 		# Get item table in each page.
-		for loop in range(1):
+		for loop in range((int(items) // displayCount) + 1):
 			print('loop == ' + str(loop))
 			try:
 				response = requests.get(self.url + category["url"] + "p" + str(loop + 1) + "/?word=", timeout = self.timeout, headers = headers)
