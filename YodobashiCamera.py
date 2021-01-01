@@ -36,7 +36,6 @@ class YodobashiCamera(Shop.Shop):
 			return itemList
 		# Get item table in each page.
 		for loop in range((int(items) // displayCount) + 1):
-			print('loop == ' + str(loop))
 			try:
 				response = requests.get(self.url + category["url"] + "p" + str(loop + 1) + "/?word=", timeout = self.timeout, headers = headers)
 			except:
@@ -52,7 +51,6 @@ class YodobashiCamera(Shop.Shop):
 			points = doc.xpath("//div[@id='listContents']/div[3]/div/div[@class='pInfo']/ul/li[3]/span")
 			percentages = doc.xpath("//div[@id='listContents']/div[3]/div/div[@class='pInfo']/ul/li[3]/span/span")
 			for i in range(len(pathes)):
-				print('i == ' + str(i))
 				try:
 					# First, I check if this item is added over 10% points.
 					percentage = re.search('（([0-9]*)％還元）', percentages[i].text).group(1)
