@@ -13,6 +13,7 @@ class YodobashiCamera(Shop.Shop):
 		super(YodobashiCamera, self).__init__()
 		self.name = "YodobashiCamera"
 		self.url = "https://www.yodobashi.com/"
+		self.maxItems = 500
 		self.itemList = []
 
 	def ObtainItemListByCategory(self, category):
