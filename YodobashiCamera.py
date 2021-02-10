@@ -98,6 +98,16 @@ class YodobashiCamera(Shop.Shop):
 	def UpdateItemList(self):
 		categories = [
 			{"url": "category/22052/500000073035/500000073036/", "name": "ヘッドホン・イヤホン"},
+			{"url": "category/19531/19532/", "name": "パソコン周辺機器"},
+			{"url": "category/19531/11970/", "name": "パソコン・タブレットPC"},
+			{"url": "category/19531/19533/", "name": "パソコアクセサリー"},
+			{"url": "category/19531/252001/", "name": "PCパーツ"},
+			{"url": "category/6353/6356/", "name": "調理"},
+			{"url": "category/6353/6355/", "name": "キッチン家電"},
+			{"url": "category/6353/6362/", "name": "健康家電"},
+			{"url": "category/6353/6358/", "name": "理美容家電"},
+			{"url": "category/141001/141336/", "name": "おもちゃ"},
+			{"url": "category/22052/500000073035/500000073036/", "name": "ヘッドホン・イヤホン"},
 		]
 		# Parallel processing by count of CPU.
 		itemListArray = Parallel(n_jobs = -1)([delayed(self.ObtainItemListByCategory)(category) for category in categories])
