@@ -5,6 +5,8 @@ import Shop
 import requests
 from lxml import html
 import re
+import subprocess
+import time
 
 from joblib import Parallel, delayed
 
@@ -23,10 +25,11 @@ class BicCamera(Shop.Shop):
 		displayCount = 100
 
 		headers = {
-			'User-Agent': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)',
+			'User-Agent': 'curl/7.64.0',
 			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
 			'Accept-Language': 'ja',
 		}
+		time.sleep(10)
 		response = requests.get(self.url + category["url"], timeout = self.timeout, headers = headers)
 		if requests.codes.ok != response.status_code:
 			print("status code is " + str(response.status_code) + " from " + self.url + category["url"])
@@ -40,7 +43,8 @@ class BicCamera(Shop.Shop):
 		# Get item table in each page.
 		for loop in range((int(items) // displayCount) + 1):
 			try:
-				esponse = requests.get(self.url + category["url"] + "/?rowPerPage=" + str(displayCount) + "&p=" + str(loop + 1), timeout = self.timeout, headers = headers)
+				time.sleep(10)
+				response = requests.get(self.url + category["url"] + "/?rowPerPage=" + str(displayCount) + "&p=" + str(loop + 1), timeout = self.timeout, headers = headers)
 			except:
 				continue
 			if requests.codes.ok != response.status_code:
@@ -68,6 +72,7 @@ class BicCamera(Shop.Shop):
 					if self.minPrice > int(price) or self.maxPrice < int(price):
 						continue
 					try:
+						time.sleep(10)
 						detailDoc = requests.get(pathes[i], timeout = self.timeout, headers = headers)
 					except:
 						print("Oops!")
@@ -195,5 +200,5 @@ class BicCamera(Shop.Shop):
 	#		{"url": "/bc/category/001/300/012/", "name": "スポーツ・フィットネス(アウトレット)"},
 		]
 		# Parallel processing by count of CPU.
-		itemListArray = Parallel(n_jobs = -1)([delayed(self.ObtainItemListByCategory)(category) for category in categories])
+		itemListArray = Parallel(n_jobs = 1)([delayed(self.ObtainItemListByCategory)(category) for category in categories])
 		self.itemList = [e for inner_list in itemListArray for e in inner_list]
