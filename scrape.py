@@ -120,7 +120,11 @@ def main():
 		if None is not aucFanPrice:
 			item["aucfan"] = "%d-%d" % (aucFanPrice["min"], aucFanPrice["max"])
 
+	print("Collecting price from each site finished.")
+
 	OutputAsCsv(csvFileName, itemList)
+
+	print("OutputAsCsv done.")
 
 	data = pd.read_csv(csvFileName)
 	data.to_excel(xlsxFileName, encoding = 'utf-8')
