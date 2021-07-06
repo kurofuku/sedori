@@ -75,17 +75,23 @@ class YodobashiCamera(Shop.Shop):
 					if requests.codes.ok != detailDoc.status_code:
 						continue
 					detailDoc.encoding = detailDoc.apparent_encoding
+					print(self.url + pathes[i])
 					# Shop
 					dict["shop"] = self.name
 					# Category
 					dict["category"] = category["name"]
 					# Model Name
 					modelList = html.fromstring(detailDoc.text).xpath("//div[@id='productTab_spec01']/ul/li[2]/a/span")
-					if(0 != len(modelList)):
+					if(0 != len(modelList)) and re.search('(.*)のもっと詳しい情報について', modelList[0].text) is not None:
 						model = modelList[0]
 						dict["name"] = re.search('(.*)のもっと詳しい情報について', model.text).group(1)
 					else:
-    						dict["name"] = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0].text
+						modelList = html.fromstring(detailDoc.text).xpath("//div[@id='productTab_spec01']/ul/li[1]/a/span")
+						if(0 != len(modelList)) and re.search('(.*)のもっと詳しい情報について', modelList[0].text) is not None:
+							model = modelList[0]
+							dict["name"] = re.search('(.*)のもっと詳しい情報について', model.text).group(1)
+						else:
+							dict["name"] = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0].text
 					# Product Name
 					product = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0]
 					dict["product"] = product.text
