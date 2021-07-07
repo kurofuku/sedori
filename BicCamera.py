@@ -4,6 +4,7 @@ import Shop
 
 import requests
 from lxml import html
+import math
 import re
 import subprocess
 import time
@@ -16,7 +17,7 @@ class BicCamera(Shop.Shop):
 		self.name = "BicCamera"
 		self.url = "https://www.biccamera.com/"
 		self.itemList = []
-		self.maxItems = 500
+		self.maxItems = 1000
 		self.minPercentage = 15
 
 	def ObtainItemListByCategory(self, category):
@@ -29,25 +30,32 @@ class BicCamera(Shop.Shop):
 			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
 			'Accept-Language': 'ja',
 		}
-		time.sleep(10)
+		print(self.url + category["url"])
 		response = requests.get(self.url + category["url"], timeout = self.timeout, headers = headers)
 		if requests.codes.ok != response.status_code:
 			print("status code is " + str(response.status_code) + " from " + self.url + category["url"])
 			return itemList
+		time.sleep(10)
 		try:
 			items = html.fromstring(response.text).xpath("//input[@type='hidden'][@name='totalRecord']/@value")[0]
+			print("items == " + items)
 		except IndexError:
 			print("Oops!")
 			print(self.url + category["url"])
 			return itemList
 		# Get item table in each page.
-		for loop in range((int(items) // displayCount) + 1):
+		if -1 != self.maxItems:
+			if int(items) > self.maxItems:
+				items = str(self.maxItems)
+		for loop in range(((int(items) - 1) // displayCount) + 1):
 			try:
+				print(self.url + category["url"] + "?rowPerPage=" + str(displayCount) + "&min=" + str(self.minPrice) + "&max=" + str(self.maxPrice) + "&p=" + str(loop + 1))
+				response = requests.get(self.url + category["url"] + "?rowPerPage=" + str(displayCount) + "&min=" + str(self.minPrice) + "&max=" + str(self.maxPrice) + "&p=" + str(loop + 1), timeout = self.timeout, headers = headers)
 				time.sleep(10)
-				response = requests.get(self.url + category["url"] + "/?rowPerPage=" + str(displayCount) + "&p=" + str(loop + 1), timeout = self.timeout, headers = headers)
 			except:
 				continue
 			if requests.codes.ok != response.status_code:
+				print("status code is " + str(response.status_code) + " from " + self.url + category["url"])
 				continue
 			doc = html.fromstring(response.text)
 			# Path for getting model name.
@@ -60,9 +68,12 @@ class BicCamera(Shop.Shop):
 				if re.search('[0-9]+(,[0-9]{1,3})*', prices[i].text) is not None:
 					price = re.search('[0-9]+(,[0-9]{1,3})*', prices[i].text).group(0).replace(",", "")
 					point = re.search('[0-9]+(,[0-9]{1,3})*', points[i].text).group(0).replace(",", "").replace("ポイント", "")
+					percentage = math.floor(int(point) / int(price) * 100)
+					if percentage < 1:
+						percentage = 1
 					try:
 						# First, I check if this item is added over 10% points.
-						if (self.minPercentage > (int(price) / int(point))):
+						if (self.minPercentage > percentage):
 							continue
 					except:
 						continue
@@ -72,8 +83,9 @@ class BicCamera(Shop.Shop):
 					if self.minPrice > int(price) or self.maxPrice < int(price):
 						continue
 					try:
-						time.sleep(10)
+						print(pathes[i])
 						detailDoc = requests.get(pathes[i], timeout = self.timeout, headers = headers)
+						time.sleep(10)
 					except:
 						print("Oops!")
 						print(pathes[i])

@@ -15,7 +15,7 @@ class Rakuten(Shop.Shop):
 		self.name = "Rakuten"
 		self.url = "https://search.rakuten.co.jp/search/mall/-/"
 		self.itemList = []
-		self.maxItems = 1000
+		self.maxItems = 450
 		self.minPercentage = 20
 
 	def ObtainItemListByCategory(self, category):
@@ -43,7 +43,7 @@ class Rakuten(Shop.Shop):
 			if int(items) > self.maxItems:
 				items = str(self.maxItems)
 		# Get item table in each page.
-		for loop in range((int(items) // displayCount) + 1):
+		for loop in range(((int(items) - 1) // displayCount) + 1):
 			thisPageUrl = baseUrl + "&p=" + str(loop + 1)
 			print(thisPageUrl)
 			try:

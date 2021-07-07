@@ -108,6 +108,7 @@ def main():
 	shopList.append(YodobashiCamera.YodobashiCamera())
 
 	for shop in shopList:
+		print("To get goods price/point of " + shop.__class__.__name__)
 		shop.UpdateItemList()
 		itemList.extend(shop.GetItemList())
 

@@ -13,7 +13,8 @@ class YodobashiCamera(Shop.Shop):
 		super(YodobashiCamera, self).__init__()
 		self.name = "YodobashiCamera"
 		self.url = "https://www.yodobashi.com/"
-		self.maxItems = 500
+		self.maxItems = 480
+		self.minPercentage = 15
 		self.itemList = []
 
 	def ObtainItemListByCategory(self, category):
@@ -25,18 +26,22 @@ class YodobashiCamera(Shop.Shop):
 			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
 			'Accept-Language': 'ja',
 		}
-		response = requests.get(self.url + category["url"] + "?word=", timeout = self.timeout, headers = headers)
+		print(self.url + category["url"] + "?lower=" + str(self.minPrice) + "&upper=" + str(self.maxPrice))
+		response = requests.get(self.url + category["url"] + "?lower=" + str(self.minPrice) + "&upper=" + str(self.maxPrice), timeout = self.timeout, headers = headers)
 		if requests.codes.ok != response.status_code:
 			print("status code is " + str(response.status_code) + " from " + self.url + category["url"])
 			return itemList
 		try:
 			items = re.search('NumHit: \'(\d+)\'', response.text).group(1)
-		except IndexError:
+		except:
 			print("Oops!")
 			print(self.url + category["url"])
 			return itemList
+		if -1 != self.maxItems:
+			if int(items) > self.maxItems:
+				items = str(self.maxItems)
 		# Get item table in each page.
-		for loop in range((int(items) // displayCount) + 1):
+		for loop in range(((int(items) - 1) // displayCount) + 1):
 			try:
 				response = requests.get(self.url + category["url"] + "p" + str(loop + 1) + "/?word=", timeout = self.timeout, headers = headers)
 			except:
@@ -55,7 +60,7 @@ class YodobashiCamera(Shop.Shop):
 				try:
 					# First, I check if this item is added over 10% points.
 					percentage = re.search('（([0-9]*)％還元）', percentages[i].text).group(1)
-					if (10 > int(percentage)):
+					if (self.minPercentage > int(percentage)):
 						continue
 				except:
 					continue
@@ -80,24 +85,29 @@ class YodobashiCamera(Shop.Shop):
 					dict["shop"] = self.name
 					# Category
 					dict["category"] = category["name"]
-					# Model Name
-					modelList = html.fromstring(detailDoc.text).xpath("//div[@id='productTab_spec01']/ul/li[2]/a/span")
-					if(0 != len(modelList)) and re.search('(.*)のもっと詳しい情報について', modelList[0].text) is not None:
-						model = modelList[0]
-						dict["name"] = re.search('(.*)のもっと詳しい情報について', model.text).group(1)
-					else:
-						modelList = html.fromstring(detailDoc.text).xpath("//div[@id='productTab_spec01']/ul/li[1]/a/span")
+					try:
+						# Model Name
+						modelList = html.fromstring(detailDoc.text).xpath("//div[@id='productTab_spec01']/ul/li[2]/a/span")
 						if(0 != len(modelList)) and re.search('(.*)のもっと詳しい情報について', modelList[0].text) is not None:
 							model = modelList[0]
 							dict["name"] = re.search('(.*)のもっと詳しい情報について', model.text).group(1)
 						else:
-							dict["name"] = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0].text
-					# Product Name
-					product = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0]
-					dict["product"] = product.text
-					point = re.search('([0-9]{1,3}(,[0-9]{1,3})?)ポイント', points[i].text).group(1)
-					dict["point"] = point.replace(",", "")
-					dict["url"] = self.url + pathes[i]
+							modelList = html.fromstring(detailDoc.text).xpath("//div[@id='productTab_spec01']/ul/li[1]/a/span")
+							if(0 != len(modelList)) and re.search('(.*)のもっと詳しい情報について', modelList[0].text) is not None:
+								model = modelList[0]
+								dict["name"] = re.search('(.*)のもっと詳しい情報について', model.text).group(1)
+							else:
+								dict["name"] = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0].text
+						# Product Name
+						product = html.fromstring(detailDoc.text).xpath("//h1[@id='products_maintitle']/span")[0]
+						dict["product"] = product.text
+						point = re.search('([0-9]{1,3}(,[0-9]{1,3})?)ポイント', points[i].text).group(1)
+						dict["point"] = point.replace(",", "")
+						dict["url"] = self.url + pathes[i]
+					except:
+						print("Oops!!")
+						print(pathes[i])
+						continue
 					itemList.append(dict)
 		return itemList
 
@@ -113,7 +123,6 @@ class YodobashiCamera(Shop.Shop):
 			{"url": "category/6353/6362/", "name": "健康家電"},
 			{"url": "category/6353/6358/", "name": "理美容家電"},
 			{"url": "category/141001/141336/", "name": "おもちゃ"},
-			{"url": "category/22052/500000073035/500000073036/", "name": "ヘッドホン・イヤホン"},
 		]
 		# Parallel processing by count of CPU.
 		itemListArray = Parallel(n_jobs = -1)([delayed(self.ObtainItemListByCategory)(category) for category in categories])

@@ -14,7 +14,7 @@ class YamadaWebCom(Shop.Shop):
 		self.name = "YamadaWebCom"
 		self.url = "https://www.yamada-denkiweb.com"
 		self.itemList = []
-		self.maxItems = 500
+		self.maxItems = 600
 		self.minPercentage = 15
 
 	def ObtainItemListByCategory(self, category):
@@ -39,7 +39,7 @@ class YamadaWebCom(Shop.Shop):
 			if int(items) > self.maxItems:
 				items = str(self.maxItems)
 		# Get item table in each page.
-		for loop in range((int(items) // displayCount) + 1):
+		for loop in range(((int(items) - 1) // displayCount) + 1):
 			print(self.url + category["url"] + "/?o=" + str(loop * displayCount) + "&limit=60&pl=" + str(self.minPrice) + "&ph=" + str(self.maxPrice))
 			try:
 				response = requests.get(self.url + category["url"] + "/?o=" + str(loop * displayCount) + "&limit=60", timeout = self.timeout)
@@ -64,7 +64,6 @@ class YamadaWebCom(Shop.Shop):
 				except:
 					print("Oopsss!")
 					continue
-				# print("price = " + prices[i].text)
 				if re.search('[1-9]+(,[0-9]{1,3})*', prices[i].text) is not None:
 					dict = {}
 					price = re.search('[1-9]+(,[0-9]{1,3})*', prices[i].text).group(0)
