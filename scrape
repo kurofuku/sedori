@@ -1,4 +1,0 @@
-#!/bin/sh
-logger "scrape.py will start shortly..."
-PYTHONPATH=/home/pi/sedori/:${PYTHONPATH} python3 /home/pi/sedori/scrape.py
-logger "scrape.py finished successfully..."
