@@ -13,7 +13,7 @@ class YodobashiCamera(Shop.Shop):
 		super(YodobashiCamera, self).__init__()
 		self.name = "YodobashiCamera"
 		self.url = "https://www.yodobashi.com/"
-		self.maxItems = 480
+		self.maxItems = 960
 		self.minPercentage = 15
 		self.itemList = []
 

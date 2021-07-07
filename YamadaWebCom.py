@@ -14,7 +14,7 @@ class YamadaWebCom(Shop.Shop):
 		self.name = "YamadaWebCom"
 		self.url = "https://www.yamada-denkiweb.com"
 		self.itemList = []
-		self.maxItems = 600
+		self.maxItems = 1200
 		self.minPercentage = 15
 
 	def ObtainItemListByCategory(self, category):

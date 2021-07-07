@@ -17,7 +17,7 @@ class BicCamera(Shop.Shop):
 		self.name = "BicCamera"
 		self.url = "https://www.biccamera.com/"
 		self.itemList = []
-		self.maxItems = 1000
+		self.maxItems = 2000
 		self.minPercentage = 15
 
 	def ObtainItemListByCategory(self, category):

@@ -9,7 +9,7 @@ class Shop(object):
 		self.itemList = []
 		self.minPercentage = 10
 		self.minPrice = 20000
-		self.maxPrice = 100000
+		self.maxPrice = 200000
 		self.maxItems = -1
 		self.timeout = 120
 

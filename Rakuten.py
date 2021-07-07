@@ -15,7 +15,7 @@ class Rakuten(Shop.Shop):
 		self.name = "Rakuten"
 		self.url = "https://search.rakuten.co.jp/search/mall/-/"
 		self.itemList = []
-		self.maxItems = 450
+		self.maxItems = 900
 		self.minPercentage = 20
 
 	def ObtainItemListByCategory(self, category):
