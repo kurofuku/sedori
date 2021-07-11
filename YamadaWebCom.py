@@ -124,8 +124,8 @@ class YamadaWebCom(Shop.Shop):
 
 		categories = [
 	#		{"url": "/category/201", "name": "冷蔵庫・洗濯機・掃除機・生活家電"},
-	#		{"url": "/category/202", "name": "電子レンジ・炊飯器・キッチン家電"},
-	#		{"url": "/category/203", "name": "エアコン・空調・季節家電"},
+			{"url": "/category/202", "name": "電子レンジ・炊飯器・キッチン家電"},
+			{"url": "/category/203", "name": "エアコン・空調・季節家電"},
 	#		{"url": "/category/204", "name": "テレビ・レコーダー"},
 			{"url": "/category/205", "name": "美容家電・健康家電"},
 			{"url": "/category/206", "name": "カメラ・ビデオカメラ"},
